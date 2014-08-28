@@ -1,3 +1,10 @@
+<?php 
+	$this->inlineScript()->appendFile('/assets/moment/min/moment-with-locales.min.js');
+	$this->inlineScript()->appendFile('/assets/holderjs/holder.js');
+	$this->inlineScript()->appendFile('/assets/jquery-jsonrpcclient/jquery.jsonrpcclient.js');
+?>
+
+
 <h1><?= $this->article->getTitle()?></h1>
 <h4>Dans la catégorie <strong>
 <?php 
@@ -16,3 +23,148 @@ echo trim($string, ' >> ');
 </strong></h4>
 <h4>Auteur :<?= $this->article->getAuthor()->getName();?></h4>
 <p><?= $this->article->getContent()?></p>
+<hr />
+<div class="container">
+	<div class="row">
+		<div id="pannelComment" class="col-lg-6 col-md-6 col-sm-6 col-xs-6 panel panel-default">
+			<div id="commentlist" class="panel-body">
+			</div>
+			<div class="container">
+				<div class="row">
+					<div class="col-lg-5 col-md-5 col-sm-5 col-xs-5">
+						<button id="addComment" class="btn btn-sm btn-default">Ajouter un commentaire</button>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-lg-5 col-md-5 col-sm-5 col-xs-5">
+						<div class="hidden" id="commentForm">
+							<textarea class="form-control" id="comment" placeholder="votre commentaire"></textarea>
+							<button class="btn btn-sm btn-primary" id="sendComment">Publier</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+<script>
+<?php $this->inlineScript()->captureStart();?>
+
+	function removeComment(idComment)
+	{
+		var rpc = new $.JsonRpcClient({ ajaxUrl: '/json' });
+		rpc.call(
+		  'removeComment', [ idComment ],
+		  function(result) { 
+			if(result){
+				loadComments();
+			}
+		  },
+		  function(error)  { console.log('There was an error', error); }
+		);
+	}
+
+	function loadComments()
+	{
+		/*$.post('<?= $this->url(array(), 'coreArticleReadcomments');?>',
+				{article : <?= $this->article->getId();?>}
+		).done(function(data){
+			var txt = "";
+			moment.locale('fr');
+			$.each(data, function(index, comment){
+				var time = moment(comment.comment_datetime);
+				txt += '<div class="media">'
+					+		'<a class="pull-left" href="#">'
+				    +			'<img class="media-object" src="holder.js/64x64" alt="...">'
+				  	+		'</a>'
+			  		+		'<div class="media-body">'
+					+ 			'<h4 class="media-heading">Par ' + comment.user_login + '<small> - ' + time.fromNow() + '</small></h4>'
+			    	+ 			comment.comment_content 
+			    	+ '		</div>'
+			    	+ '</div>'
+			    	+ '<hr />';
+			});
+			$('#commentlist').html(txt);
+			Holder.run();
+		});*/
+
+		var rpc = new $.JsonRpcClient({ ajaxUrl: '/json' });
+		rpc.call(
+		  'readComments', [ <?= $this->article->getId();?> ],
+		  function(result) { 
+			  var txt = "";
+			  $.each(result, function(index, comment){
+					var time = moment(comment.comment_datetime);
+					txt += '<div class="media">'
+						+		'<a class="pull-left" href="#">'
+					    +			'<img class="media-object" src="holder.js/64x64" alt="...">'
+					  	+		'</a>'
+				  		+		'<div class="media-body">'
+				  		+			'<div class="container">'
+				  		+				'<div class="row">'
+				  		+					'<div class="col-lg-4 col-md-4">'		  		
+						+ 						'<h4 class="media-heading">Par ' + comment.user_login + '<small> - ' + time.fromNow() + '</small></h4>'
+				    	+ 						comment.comment_content
+				    	+					'</div>'
+				    	+					'<div class="col-lg-1 col-md-1">'
+				    	+						'<span class="glyphicon glyphicon-remove" style="cursor:pointer;" onClick="removeComment(' + comment.comment_id + ')"></span>'
+				    	+					'</div>'
+				    	+				'</div>'
+				    	+			'</div>' 
+				    	+ '		</div>'
+				    	+ '</div>'
+				    	+ '<hr />';
+				});
+			  $('#commentlist').html(txt);
+			  Holder.run();
+		  },
+		  function(error)  { console.log('There was an error', error); }
+		);
+
+	}
+
+	
+
+	$(document).ready(function(){
+		$("#addComment").on("click", function(e){
+			e.preventDefault();
+			$("#commentForm").removeClass('hidden');
+			$("#addComment").addClass("disabled");
+		});
+
+		loadComments();
+		
+		$("#sendComment").on("click", function(e){			
+			e.preventDefault();
+			/*$.post('<?= $this->url(array(), 'coreArticleAddcomment');?>',
+					{
+						comment : $('#comment').val(), 
+						article : <?= $this->article->getId();?>
+					}										
+			).done(function(data){
+				loadComments();
+				$('#comment').val('');
+				$("#commentForm").addClass('hidden');
+				$("#addComment").removeClass("disabled");
+			});*/
+
+			var rpc = new $.JsonRpcClient({ ajaxUrl: '/json' });
+			rpc.call(
+			  'saveComment', [ $('#comment').val(), <?= $this->article->getId();?>, <?= Zend_Auth::getInstance()->getIdentity()->getId();?> ],
+			  function(result) { 
+				if(result){
+					loadComments();
+					$('#comment').val('');
+					$("#commentForm").addClass('hidden');
+					$("#addComment").removeClass("disabled");
+				}
+			  },
+			  function(error)  { console.log('There was an error', error); }
+			);
+		});
+	});
+
+<?php $this->inlineScript()->captureEnd();?>
+</script>

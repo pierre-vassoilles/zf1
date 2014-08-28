@@ -56,11 +56,20 @@ class Core_Bootstrap extends Zend_Application_Module_Bootstrap
 		$acl->addResource('Core::article::categorieview');
 		$acl->addResource('Core::article::index');
 		$acl->addResource('Core::article::view');
+		$acl->addResource('Core::article::addcomment');
+		$acl->addResource('Core::article::readcomments');
 		
+		$acl->addResource('Core::index::clearcache');
 		$acl->addResource('Core::index::index');
 		$acl->addResource('Core::index::signin');
 		$acl->addResource('Core::index::logout');
 		$acl->addResource('Core::sandbox::index');
+		
+		$acl->addResource('Core::soap::index');
+		$acl->addResource('Core::soap::client');
+		
+		$acl->addResource('Core::json::server');
+		$acl->addResource('Core::json::client');
 		
 		$acl->addResource('Core::error::error');
 		

@@ -47,7 +47,11 @@
         <div class="navbar-collapse collapse">
         <?php 
         	$auth = Zend_Auth::getInstance();
-        	$roleAuth = $auth->getIdentity()->getRoleId();
+        	if($auth->hasIdentity()){
+        		$roleAuth = $auth->getIdentity()->getRoleId();
+        	} else {
+				$roleAuth = 'invite';
+			}
         ?>
           <?= $this->navigation()
           	->setAcl(Zend_Registry::get('Zend_Acl'))
@@ -69,7 +73,7 @@
         	->setSeparator(' &#8658; ')
         	?> 
         </div>
-        
+
         <?= $this->layout()->content ?>
 
 

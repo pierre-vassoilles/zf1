@@ -8,10 +8,17 @@
 class Core_ArticleController extends Zend_Controller_Action
 {
 	private $blogSvc;
+	private $cache;
 	
 	public function init()
 	{
 		$this->blogSvc = new Core_Service_Blog();
+		
+		$this->cache = Zend_Controller_Front::getInstance()
+					->getParam('bootstrap')
+					->getResource('cachemanager')
+					->getCache('data1');
+		
 	}
 	
 	public function indexAction()
@@ -57,14 +64,32 @@ class Core_ArticleController extends Zend_Controller_Action
 	
 	public function categoriesAction()
 	{
-		$this->view->categories = $this->blogSvc->fetchCategories();
+
+		$categories = $this->cache->load('categories_data');
+		if($categories === false){
+			$categories = $this->blogSvc->fetchCategories();
+			$this->cache->save($categories);
+		}
+		
+		$this->view->categories = $categories;
+		
 	}
 	
 	public function categorieviewAction()
 	{
 		$categorieId = $this->getRequest()->getParam('id');
-		$this->view->articles = $this->blogSvc->fetchArticlesByCategory($categorieId);
-		$this->view->categorie = $this->blogSvc->findCategorie($categorieId);
+		$articles =  $this->cache->load('articles_cat_' . $categorieId);
+		if($articles === false) {
+			$articles = $this->blogSvc->fetchArticlesByCategory($categorieId);
+			$this->cache->save($articles);
+		}
+		$categorie = $this->cache->load('category_' . $categorieId);
+		if($categorie === false){			
+			$categorie = $this->blogSvc->findCategorie($categorieId);
+			$this->cache->save($categorie);
+		}
+		$this->view->categorie = $categorie;
+		$this->view->articles = $articles;
 	}	
 	
 	public function addarticleAction()
@@ -84,6 +109,7 @@ class Core_ArticleController extends Zend_Controller_Action
 				try {
 					$this->blogSvc->saveArticle($article);
 					$this->view->message = "Article ajouté";
+					$this->cache->remove('articles_cat_' . $article->getCategorie()->getId());
 				} catch(Exception $e) {
 					$this->view->message = $e->getMessage();
 				}
@@ -112,6 +138,33 @@ class Core_ArticleController extends Zend_Controller_Action
 		}
 		
 		exit;
+	}
+	
+	
+	public function addcommentAction()
+	{
+		if(!$this->getRequest()->isXmlHttpRequest()){
+			$this->getResponse()->setHttpResponseCode(403);
+			$this->_helper->json('403 - Forbidden');
+		}
+		
+		$comment = $this->getRequest()->getParam("comment");
+		$article = $this->getRequest()->getParam("article");
+		$user = Zend_Auth::getInstance()->getIdentity()->getId();
+
+		$this->_helper->json($this->blogSvc->saveComment($comment, $article, $user));
+	}
+	
+	public function readcommentsAction()
+	{
+		if(!$this->getRequest()->isXmlHttpRequest()){
+			$this->getResponse()->setHttpResponseCode(403);
+			$this->_helper->json('403 - Forbidden');
+		}
+		
+		$article = $this->getRequest()->getParam("article");
+		
+		$this->_helper->json($this->blogSvc->readComments($article));
 	}
 	
 }

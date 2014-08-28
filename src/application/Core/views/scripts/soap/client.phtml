@@ -1,0 +1,36 @@
+<?php $this->inlineScript()->appendFile('/assets/jquery.soap/jquery.soap.js'); ?>
+<?php $this->inlineScript()->appendFile('/assets/jquery-xml2json/src/xml2json.js'); ?>
+
+
+
+<h1>
+	R&eacute;sultat de l'appel<br /> de la m&eacute;thode Test du WS Soap : <?= $this->toto;?>
+</h1>
+
+
+
+<script>
+<?php $this->inlineScript()->captureStart();?>
+$(document).ready(function(){
+	$.soap({
+	    url: 'http://www.project.dev/ws#',
+	    method: 'test',
+
+	    data: {
+	        testIn: 'Remy Blom'
+	    },
+
+	    success: function (soapResponse) {
+		    console.log(soapResponse.toJSON());
+	        // do stuff with soapResponse
+	        // if you want to have the response as JSON use soapResponse.toJSON();
+	        // or soapResponse.toString() to get XML string
+	        // or soapResponse.toXML() to get XML DOM
+	    },
+	    error: function (SOAPResponse) {
+	        // show error
+	    }
+	});
+});
+<?php $this->inlineScript()->captureEnd();?>
+</script>

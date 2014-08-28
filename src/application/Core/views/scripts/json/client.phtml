@@ -1,0 +1,18 @@
+<?php $this->inlineScript()->appendFile('/assets/jquery-jsonrpcclient/jquery.jsonrpcclient.js'); ?>
+
+<h1 id="msg"></h1>
+
+<script>
+<?php $this->inlineScript()->captureStart();?>
+$(document).ready(function(){
+
+	var foo = new $.JsonRpcClient({ ajaxUrl: '/json' });
+	foo.call(
+	  'readComments', [ 55 ],
+	  function(result) { console.log(result);},
+	  function(error)  { console.log('There was an error', error); }
+	);
+	
+});
+<?php $this->inlineScript()->captureEnd();?>
+</script>
