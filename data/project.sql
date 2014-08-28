@@ -1,6 +1,6 @@
 SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 SET time_zone = "+00:00";
-CREATE DATABASE `project` DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci;
+CREATE DATABASE `project` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
 USE `project`;
 
 CREATE TABLE IF NOT EXISTS `article` (
@@ -69,7 +69,7 @@ CREATE TABLE IF NOT EXISTS `author` (
   `author_name` varchar(255) NOT NULL,
   `author_email` varchar(255) NOT NULL,
   PRIMARY KEY (`author_id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=2 ;
 
 INSERT INTO `author` (`author_id`, `author_name`, `author_email`) VALUES
 (1, 'Test', 'test@gmail.com');
@@ -92,7 +92,7 @@ CREATE TABLE IF NOT EXISTS `user` (
   `user_login` varchar(200) NOT NULL,
   `user_password` varchar(50) NOT NULL,
   PRIMARY KEY (`user_id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=2 ;
 
 INSERT INTO `user` (`user_id`, `user_login`, `user_password`) VALUES
 (1, 'admin', '123456');
